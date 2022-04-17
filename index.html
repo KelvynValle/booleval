@@ -3,8 +3,12 @@
 <head>
     <script src="booleval.js"></script>
     <script>
-        let expression = "a > b and b > c";
-        let tree = createTree(expression);
+        let expression = "(10 < 20 && 30 == 50 || (10 < 20)) && 60 < 40";
+        if (boolEval(expression)) {
+            console.log("yes");
+        } else {
+            console.log("no");
+        }
     </script>
 </head>
 

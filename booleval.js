@@ -1,65 +1,102 @@
 /*
     evaluates a boolean expression
-    creates decision tree and evaluate the content
 */
-function eval(expression) {
-
-}
-
-/*
-    create a tree with the data to compare
-    the nodes are connected with the logical operators
-*/
-
-var bool_operators = [">", "<", "==", ">=", "<=", "and", "or", "&&", "||"];
-
-function createTree(expression) {
-    let first = true;
-    let tree = { operator: "start", node1: undefined };
-    let operator;
-    for (var i = 0; i < expression.length; i++) {
-        while (expression[i] == " ") {
-            i++;
-        }
-        if (expression[i] == '(') {
-            let end = lastParentesis(expression, i);
-            let node = createTree(selectParenthesis(expression, i, end));
-            i = end++;
-            if (first) {
-                first = false;
-                tree.node1 = node;
-            } else {
-                tree = { node1: tree, node2: node, operator: operator };
+function boolEval(expression) {
+    if (expression.includes("||") || expression.includes("&&")) {
+        for (let i = 0; i < expression.length; i++) {
+            while (expression[i] == " ") {
+                i++;
             }
-        } else {
-            let next_space = expression.indexOf(" ", i);
-            next_space = next_space == -1 ? expression.length : next_space;
-            let node = expression.substring(i, next_space);
-            i = next_space;
-            if (first) {
-                first = false;
-                tree.node1 = node;
-            } else {
-                if (bool_operators.includes(node)) {
-                    operator = node;
+            if (expression[i] == "(") {
+                let end_parenthesis = lastParentesis(expression, i);
+                if (end_parenthesis == expression.length - 1) {
+                    return boolEval(expression.slice(i + 1, end_parenthesis));
                 } else {
-                    tree = { node1: tree, node2: node, operator: operator };
+                    let left = expression.slice(i + 1, end_parenthesis);
+                    i = end_parenthesis + 1;
+                    while (expression[i] == " ") {
+                        i++;
+                    }
+                    let next_space = expression.indexOf(" ", i);
+                    next_space == -1 ? expression.length : next_space;
+                    switch (expression.substring(i, next_space)) {
+                        case "||":
+                            return boolEval(left) || boolEval(expression.slice(next_space + 1));
+                        case "&&":
+                            return boolEval(left) && boolEval(expression.slice(next_space + 1));
+                        default:
+                            console.log("Error.")
+                            break;
+                    }
+                }
+            } else {
+                let next_space = expression.indexOf(" ", i);
+                next_space == -1 ? expression.length : next_space;
+                switch (expression.substring(i, next_space)) {
+                    case "||":
+                        return boolEval(expression.substring(0, i - 1)) || boolEval(expression.substring(next_space + 1, expression.length));
+                    case "&&":
+                        return boolEval(expression.substring(0, i - 1)) && boolEval(expression.substring(next_space + 1, expression.length));
+                    default:
+                        i = next_space;
+                        break;
                 }
             }
         }
+    } else {
+        if (expression[0] == "(") {
+            let end_parenthesis = lastParentesis(expression, 0);
+            return boolEval(expression.slice(1, end_parenthesis));
+        } else {
+            let branch = expression.split(" ");
+            if (!isNaN(branch[0]) && !isNaN(branch[2])) {
+                return nodeEval(parseFloat(branch[0]), parseFloat(branch[2]), branch[1]);
+            }
+        }
     }
-    return tree;
 }
-
 
 /*
-    select the data between parenthesis
+    node eval
+    interprets the relation between two nodes
 */
-//select the data between two parenthesis
-function selectParenthesis(expression, start, end) {
-
+function nodeEval(node1, node2, operator) {
+    switch (operator) {
+        case "==":
+            return node1 == node2;
+        case "!=":
+            return node1 != node2;
+        case ">":
+            return node1 > node2;
+        case "<":
+            return node1 < node2;
+        case ">=":
+            return node1 >= node2;
+        case "<=":
+            return node1 <= node2;
+        case "and":
+        case "&&":
+            return node1 && node2;
+        case "or":
+        case "||":
+            return node1 || node2;
+    }
 }
-//finds the last parenthesis as we give the start one
-function lastParentesis(expression, start) {
 
+/*
+    finds the last parenthesis as we give the start one
+*/
+function lastParentesis(expression, start) {
+    let parenthesis_count = 0;
+    for (let i = start; i < expression.length; i++) {
+        if (expression[i] == "(") {
+            parenthesis_count++;
+        } else if (expression[i] == ")") {
+            parenthesis_count--;
+        }
+        if (parenthesis_count == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
