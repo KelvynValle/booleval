@@ -1,7 +1,7 @@
 /*
     evaluates a boolean expression
 */
-function boolEval(expression) {
+function boolEval(expression, inversion = false) {
     if (expression.includes("||") || expression.includes("&&")) {
         for (let i = 0; i < expression.length; i++) {
             while (expression[i] == " ") {
@@ -10,7 +10,7 @@ function boolEval(expression) {
             if (expression[i] == "(") {
                 let end_parenthesis = lastParentesis(expression, i);
                 if (end_parenthesis == expression.length - 1) {
-                    return boolEval(expression.slice(i + 1, end_parenthesis));
+                    return inversion ? !boolEval(expression.slice(i + 1, end_parenthesis)) : !boolEval(expression.slice(i + 1, end_parenthesis));
                 } else {
                     let left = expression.slice(i + 1, end_parenthesis);
                     i = end_parenthesis + 1;
@@ -21,14 +21,16 @@ function boolEval(expression) {
                     next_space == -1 ? expression.length : next_space;
                     switch (expression.substring(i, next_space)) {
                         case "||":
-                            return boolEval(left) || boolEval(expression.slice(next_space + 1));
+                            return (inversion ? !boolEval(left) : boolEval(left)) || boolEval(expression.slice(next_space + 1));
                         case "&&":
-                            return boolEval(left) && boolEval(expression.slice(next_space + 1));
+                            return (inversion ? !boolEval(left) : boolEval(left)) && boolEval(expression.slice(next_space + 1));
                         default:
                             console.log("Error.")
                             break;
                     }
                 }
+            } else if (expression[i] == "!") {
+                return boolEval(expression.slice(i + 1, expression.length), true);
             } else {
                 let next_space = expression.indexOf(" ", i);
                 next_space == -1 ? expression.length : next_space;
@@ -46,11 +48,13 @@ function boolEval(expression) {
     } else {
         if (expression[0] == "(") {
             let end_parenthesis = lastParentesis(expression, 0);
-            return boolEval(expression.slice(1, end_parenthesis));
+            return inversion ? !boolEval(expression.slice(1, end_parenthesis)) : boolEval(expression.slice(1, end_parenthesis));
+        } else if (expression[0] == "!") {
+            return inversion ? !boolEval(expression.slice(1, expression.length), true) : boolEval(expression.slice(1, expression.length), true);
         } else {
             let branch = expression.split(" ");
             if (!isNaN(branch[0]) && !isNaN(branch[2])) {
-                return nodeEval(parseFloat(branch[0]), parseFloat(branch[2]), branch[1]);
+                return inversion ? !nodeEval(parseFloat(branch[0]), parseFloat(branch[2]), branch[1]) : nodeEval(parseFloat(branch[0]), parseFloat(branch[2]), branch[1]);
             }
         }
     }

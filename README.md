@@ -22,6 +22,7 @@ To use the boolEval() function, you just have to call it freely with your boolea
 ## 🤖 Examples
 ```Javascript
 boolEval("10 > 20"); //returns false
+boolEval("!(10 > 20)"); //returns true
 boolEval("10 > 20 || 20 > 15"); //returns true
 boolEval("10 > 20 && 20 > 15"); //returns false
 boolEval("(10 == 20 || 20 < 30) && 5 == 5"); //returns true
